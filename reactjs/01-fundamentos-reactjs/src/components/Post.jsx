@@ -1,32 +1,28 @@
 /* eslint-disable react/jsx-key */
-import { format, formatDistanceToNow } from 'date-fns';
-import ptBr from 'date-fns/locale/pt-BR';
-import { useState } from 'react';
+import { format, formatDistanceToNow } from "date-fns";
+import ptBr from "date-fns/locale/pt-BR";
+import { useState } from "react";
 
-import { Avatar } from './Avatar';
-import { Comment } from './Comment';
+import { Avatar } from "./Avatar";
+import { Comment } from "./Comment";
 
-import styles from './Post.module.css';
+import styles from "./Post.module.css";
 
 export function Post({ author, publishedAt, content }) {
-  const [comments, setComments] = useState(['Post muito bacana, hein?']);
+  const [comments, setComments] = useState(["Post muito bacana, hein?"]);
 
-  const [newCommentText, setNewCommentText] = useState('');
+  const [newCommentText, setNewCommentText] = useState("");
 
   const publishedDateFormated = format(
     publishedAt,
     "d' de 'LLLL' às 'HH:mm'h'",
-    { locale: ptBr }
+    { locale: ptBr },
   );
 
   const publishedDateRelativeToNow = formatDistanceToNow(publishedAt, {
     locale: ptBr,
     addSuffix: true,
   });
-
-  function handleNewCommentChange() {
-    setNewCommentText(event.target.value);
-  }
 
   function deleteComment(commentToDelete) {
     const commentsWithoutDeletedOne = comments.filter((comment) => {
@@ -39,8 +35,19 @@ export function Post({ author, publishedAt, content }) {
   function handleCreateNewComment() {
     event.preventDefault();
     setComments([...comments, newCommentText]);
-    setNewCommentText('');
+    setNewCommentText("");
   }
+
+  function handleNewCommentChange() {
+    event.target.setCustomValidity("");
+    setNewCommentText(event.target.value);
+  }
+
+  function handleNewCommentInvalid() {
+    event.target.setCustomValidity("Esse campo é obrigatório");
+  }
+
+  const isNewCommentEmpty = newCommentText.length === 0;
 
   return (
     <article className={styles.post}>
@@ -62,9 +69,9 @@ export function Post({ author, publishedAt, content }) {
       </header>
       <div className={styles.content}>
         {content.map((line, index) => {
-          if (line.type === 'paragraph') {
+          if (line.type === "paragraph") {
             return <p key={index}>{line.content}</p>;
-          } else if (line.type === 'link') {
+          } else if (line.type === "link") {
             return (
               <p key={index}>
                 <a href="#">{line.content}</a>
@@ -82,9 +89,13 @@ export function Post({ author, publishedAt, content }) {
           placeholder="Deixe seu comentário"
           value={newCommentText}
           onChange={handleNewCommentChange}
+          onInvalid={handleNewCommentInvalid}
+          required
         />
         <footer>
-          <button type="submit">Publicar</button>
+          <button type="submit" disabled={isNewCommentEmpty}>
+            Publicar
+          </button>
         </footer>
       </form>
 
